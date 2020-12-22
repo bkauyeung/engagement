@@ -1,0 +1,49 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}Finished{% endblock %}
+
+{% block main %}
+
+<head>
+<style>
+h1 {text-align: center;}
+p {text-align: center;}
+div {text-align: center;}
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+</style>
+</head>
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h1>Testing Completed</h1>
+      <hr>
+    </div>
+  </div>
+</div>
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Index</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+  <p>Thank you for completing the facial grading exercise.</p>
+  <p>Stay tuned for experiment updates.</p>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <img src="{{ url_for('static', filename='img/deepfake.jpg') }}" alt="engagement" width="50%" height="50%">
+</body>
+
+</html>
+
+{% endblock %}

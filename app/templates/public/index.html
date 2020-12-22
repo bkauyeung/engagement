@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}Face Recognition Training{% endblock %}
+
+{% block main %}
+<style>
+div.a {text-align: center;}
+.indented {padding-left: 50pt; padding-right: 50pt;}
+.newspaper {
+  column-count: 2;
+  column-gap: 40px;
+  column-rule: 1px solid lightblue;
+}
+
+h3 {
+  column-span: all;
+}
+img.resize {
+  width:80%;
+  height:100%;
+}
+p.c {
+  white-space: pre;
+}
+</style>
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h1 style="text-align:center">
+      Face Image Training</h1>
+      <h2 style="text-align:center">
+      Human Labeling</h2>
+    </div>
+  </div>
+</div>
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Index</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+  <div class="newspaper">
+  <h3 class="indented" style="color: blue">Student Faces</h3> <BR>
+  <p style="font-size:20px" class="indented">In this experiment, you will be answer questions about whether an individual in the zoom picture is engaged. There are 100+ images and 2 questions per image.
+    Please answer each question to the best of your ability. Your answers will be recorded for engagement model training purposes.
+    The results will be compared to other grader(s) and an average will be calculated. In the case a particular picture gets the label 'Cant decide' more than once,
+    we will discard that sample. For more information, please read <a href="https://arxiv.org/abs/1808.02324">this paper</a> for reference.<BR><BR>
+    <b>IMPORTANT:</b> If you see yourself or anyone on the Engagement Team in your pictures, please select 'Cant decide' for both questions. <BR><BR>
+    Please hit the <b>START</b> button to begin.
+      <BR><BR>
+    - Engagement Team Coordinators: <BR>
+      Bryan, Dana, Vasanth, Alexandra, Casey </p>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <img class="resize" src="{{ url_for('static', filename='img/engagement_cloud.jpg') }}" alt="">
+  </div>
+</body>
+
+</html>
+
+
+{% endblock %}

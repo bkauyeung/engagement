@@ -1,0 +1,721 @@
+---
+title: "Engagement_Final_Project"
+author: "Bryan Auyeung, Dana Kaban, Alexandra Savelieva, Casey King, Vasanth Ramani"
+date: "11/22/2020"
+output: 
+    pdf_document: default
+    github_document: default
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(
+    inputFile, encoding = encoding,
+    output_format = c('github_document', 'pdf_document')) 
+    })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# load packages
+# install.packages("AER")
+# install.packages("pwr")
+library(AER)
+library(foreign)
+library(data.table)
+library(knitr)
+library(dplyr)
+library(sandwich)
+library(stargazer)
+library(lmtest)
+library(plyr)
+library(pwr)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+# Abstract
+
+# Introduction
+
+Engagement is a key indicator in understanding the effectiveness of education informational systems. It is defined and measured differently across various applications such as search engines, sales teams, and mobile apps. At the intersection of human-technology interactions and academia, engagement plays a critical role in the learning process and has important bearings on learning outcomes. 
+
+As MOOCs and personal development platforms are growing in popularity, it is increasingly important to understand learning engagements in an online context. The proliferation and challenges of online education is also highlighted by the COVID-19 epidemic. As educators turn to online video platforms and e-learning tools, the question of learning effectiveness persists: Are students readily understanding schoolwork and class concepts in spite of the distractions, learning curves, and accountability measures associated with an online environment?[1] Despite the proliferation of online platforms, the in-person connection in classrooms is often the linchpin for academic success.[2] According to the National Center on Safe Supporting Learning Environments, engagement is defined as "strong relationships between students, teachers, families, and schools, and strong connections between schools and the broader community." Here we focus improving engagement by studying the outcomes of student to student interactions within online classes.
+
+The aim of this research is to extract, process, and estimate naturally occurring emotions of students for the purpose of evaluating treatment of pedagogical experiments during different learning situations. Our motivation for doing this research is twofold: first, to inform theoretical understanding of human behavior in learning situations; second, to enable the development of computerized learning companions that could provide effective personalized assistance online.
+
+
+# Related Work
+
+Traditionally the measurements of experiment results in this domain have been taken either by observers or collected via surveys. It presents a number of challenges: in the case of relying on data from observers, systemic bias may be introduced; also, their participation is an interference. When students are asked to fill surveys, there are high risks related to low participation rate and inaccurate responses. In both methods, very high costs are required to get results with statistical power.
+
+This research addresses these issues in an innovative way by using computer vision for automatic detection of emotions and using them as an approximation of students’ engagement and perception of the educational content. AI tools allow to collect data at high scale and low cost, enabling an objective unbiased estimate of emotions that students exhibit during online classes.
+
+
+# Research Question
+
+## Hypothesis
+
+The question we attempt to answer in this experiment is: Do questions relevant to class material asked between students in online courses generate higher levels of engagement?
+
+We predict that asking students about course material throughout lecture will stimulate engagement among individuals who were not previously engaged. For students who are already behaviorally and emotionally attentive, we believe that such interactions will reinforce engagement in class. The types of questions we ask to students give them information on our thought process and engagement, which could positively impact their own response. 
+
+# Experiment Design
+## Experiment Overview
+
+
+
+## Engagement Recognition through Image Analysis
+### Student Engagement Dataset
+
+To determine changes in levels of engagement in student faces, we constructed a new dataset called the Student Engagement Dataset. The purpose of this dataset is for fine tuning a deep learning engagement model[3] to recognize and determine engagement in MIDS students. The data is used solely for research purposes in training the model and is unavailable for public use. A total of 6 video recordings across 4 MIDS courses were used to create the images. These videos are provided to students within the Berkeley MIDS program. Utilizing the gallery view functionality withing Zoom Web Recordings, the student samples were collected from the recorded videos at a fixed rate of 12 fps in random time frames spanning the length of the class session. A total 1,702 frames of student screens cropped from recorded videos of the virtual classroom were collected, giving us a representative distribution of facial expressions for subjects across different class sections and within individual classes. Images are normalized to 310x170 pixels and student names are blacked out from images for student anonymity.
+
+## Data Labeling
+
+In order to fine tune the engagement model, we created a custom annotation software enabling annotators to independently label 200+ samples. This labeling process was adopted from techniques used by Nezami[3] and inspired by Aslan et.al.[4] Each sample is annotated by at least 2 annotators from our research group. The Fleiss kappa for these annotators is - FINISH THIS SENTENCE LATER-. Prior to labeling, each annotator is briefed with the behavioral and emotional dimensions of engagement as shown below. 
+
+<em>Behavioral Dimension:</em><br>
+* On-task: The student is looking towards the screen or looking down to the keyboard below the screen.<br>
+* Off-task: The student is looking everywhere else or eyes completely closed, or head turned away.<br>
+* Can't Decide: If you cannot decide on the behavioral state.<br>
+
+<em>Emotional Dimension:</em><br>
+*Satisfied: If the student is not having any emotional problems during the learning task. This can include all positive states of the student from being neutral to being excited during the learning task.<br>
+*Confused: If the student is getting confused during the learning task. In some cases, this state might include some other negative states such as frustration.<br>
+*Bored: If the stsudent is feeling bored during the learning task.<br>
+*Can't Decide: If you cannot decide on the emotional state.<br>
+
+Images are first randomly selected from the Student Engagement Dataset and presented to the annotator for labeling. Given these behavioral and emotional dimensions, annotators labeled faces according to their understanding and interpretation of the image. A sample of the labeling software is shown in Fig.1. ![Fig. 1](Images_for_Paper/software_snapshot.png). The labels are stored in MongoDB database and then averaged - FINISH THIS SENTENCE LATER -. In cases where an image receives more than two 'Can't Decide' labels, the image is removed from the training set. With this approach, the Student Engagement Dataset has FINISH THIS SENTENCE LATER engagement and X disengagement photos. 
+
+## Data Analysis
+### Engagement Recognition with Deep Learning
+
+We analyzed engagement using the deep learning model proposed by Nezamim[3]. 
+
+
+# Experiments
+
+# Pilot
+
+
+
+```{r}
+# helper methods
+get_robust_se <- function(ml) {
+    ml.vcovHC <- vcovHC(ml)
+    ct <- coeftest(ml, vcov. = ml.vcovHC)
+    #ate <- ct[2,1]
+    return(ct)
+}
+```
+
+```{r}
+# load data
+d <- fread('./Data_processed/all_data.csv')
+head(d)
+```
+
+```{r}
+
+d[, total_frames := total_frames_pre + total_frames_after] # total frames for each subject
+d[, pw_score := score_pre / total_frames_pre] # pre weighted score
+d[, aw_score := score_after / total_frames_after] # after weighted score
+head(d)
+```
+
+```{r}
+# take only the relevant columns
+pilot_data <- d[date == 10292020 & (section == 'Sec4' | section == 'Sec5'), .(date, section, subject, study, treatment_group, output = 100 * (aw_score - pw_score))]
+pilot_data
+```
+
+
+```{r}
+# baseline model
+m_bl <- lm(output ~ treatment_group, data = pilot_data)
+m_bl.vcovHC <- vcovHC(m_bl)
+coeftest(m_bl, vcov. = m_bl.vcovHC)
+```
+
+
+```{r}
+# model
+pilot_data[, block := paste(section, study)]
+m <- lm(output ~ treatment_group + as.factor(block), data = pilot_data)
+m.vcovHC <- vcovHC(m)
+coeftest(m, vcov. = m.vcovHC)
+```
+
+
+```{r}
+stargazer::stargazer(m_bl, 
+                     m , 
+                     type='text', 
+                     se=list(sqrt(diag(m_bl.vcovHC)), sqrt(diag(m.vcovHC))), 
+                     column.labels = c("Baseline Model", "Model"))
+```
+
+
+
+# Full Experiment - Single Channel
+
+```{r}
+# load data
+d <- fread('./Data_processed/all_data.csv')
+head(d)
+```
+# Power Calculation
+```{r}
+# Create the power dataset, which is a pilot study sample dataset. 
+power_data <- d
+power_data[, pre:=(score_pre/total_frames_pre)]
+power_data[, after:=(score_after/total_frames_after)]
+pilot5 <- power_data[(date==10292020 & section=='Sec5'),.(subject, treatment_group, pre, after, total_frames_pre, total_frames_after, score_pre, score_after)]
+pilot5 <- pilot5[, te := (after-pre)]
+
+pilot4 <- power_data[(date==10292020 & section=='Sec4'),.(subject, treatment_group, pre, after)]
+pilot4 <- pilot4[, te := (after-pre)]
+
+unblocked_data <- power_data[, te:= after-pre]
+```
+
+```{r}
+pilot5
+```
+```{r}
+# Get standard deviations and means for the power calculation.
+sd_control5 <- sd(pilot5[treatment_group==0, te])
+mean_control5 <- mean(pilot5[treatment_group==0, te])
+sd_treatment5 <- sd(pilot5[treatment_group==1, te])
+mean_treatment5 <- mean(pilot5[treatment_group==1, te])
+
+```
+
+
+```{r}
+# Power calculation using the t test for differences in means (as opposed to using RI)
+# Change the standard deviation below as needed for experiments. 
+power_test_t <- function(
+  mean_control = 10, 
+  mean_treat = 11, 
+  sd_control = sd_control5,
+  sd_treat = sd_treatment5, 
+  number_per_condition = 40, 
+  power_loops = 100, 
+  ri_loops = 100, 
+  verbose = TRUE) { 
+
+    p_values <- NA   
+    ri <- NA 
+ 
+    d <- data.table(condition = rep(c('control', 'treatment'), each = number_per_condition))
+    
+    for(power_loop in 1:power_loops) { 
+      if(verbose == TRUE) {
+        if(power_loop %% 10 == 0) {
+          cat(sprintf('Loop Number: %.0f\n', power_loop))
+        }
+      } 
+
+      p_values[power_loop] <- t.test(
+        x = rnorm(number_per_condition, mean = mean_control, sd = sd_control), 
+        y = rnorm(number_per_condition, mean = mean_treat, sd = sd_treat)
+      )$p.value
+    }
+      
+    return(list(
+      'p_values' = p_values, 
+      'power' = mean(p_values < 0.05)
+      ))
+}
+```
+
+```{r}
+#Increasing effect size to see the increases in power.
+
+# Observation 1: Looking at the section block and ignoring the study blocks, we see that the power is around 5%.
+power_test_t(
+  mean_control = mean_control5, mean_treat = mean_treatment5, number_per_condition=7, power_loops = 1000, verbose = FALSE)$power
+
+# Observation 2: Even if we look at the power without blocking, we see that power is very low (beneath 10%).
+mean_control_unblocked <- mean(unblocked_data[treatment_group==0, te])
+mean_treatment_unblocked <- mean(unblocked_data[treatment_group==1, te])
+sd_control_unblocked <- sd(unblocked_data[treatment_group==0, te])
+sd_treatment_unblocked <- sd(unblocked_data[treatment_group==1, te])
+# print(paste('mean treatment unblocked', mean_treatment_unblocked), quote=FALSE)
+# print(paste('mean treatment on pilot 5', mean_treatment5), quote=FALSE)
+
+power_test_t(
+  mean_control = mean_control5, mean_treat = mean_treatment5, sd_control=sd_control_unblocked, sd_treat = sd_treatment_unblocked,  number_per_condition=46, power_loops = 1000, verbose = FALSE)$power
+```
+
+```{r}
+# We will increase the sample size assuming that the experiment involves all students in one class (not blocking by section, because we know that no classroom can possibly have 1000+ students). This is just an assumption we will make for the power calculation.
+
+# We see that we would need around 300 individuals to get the same treatment effect 
+
+total_samples_per_condition <- c(20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 150, 300, 350)
+
+power_level <- NA 
+
+for(i in 1:length(total_samples_per_condition)) { 
+  power_level[i] <- power_test_t(
+    mean_control = mean_control_unblocked, mean_treat = mean_treatment_unblocked, sd_control=sd_control_unblocked, sd_treat = sd_treatment_unblocked,
+    power_loops = 1000, verbose = FALSE,
+    number_per_condition = total_samples_per_condition[i]
+    )$power
+}
+
+plot(x = total_samples_per_condition, y = power_level, type = 'l')
+```
+
+```{r}
+# Conclusion from above: We hope that we can get a 300 person sample to run the experiment with high power. However, the number of measurements we take for each individual are much higher: we collect 300+ frames for subjects before and after treatment. For our experiment, we justify the significance of engagement on a single frame level by deconstructing the treatment effect for each subject. Given one treatment, we have approximately 300 pre-treatment outcomes and 300 post-treatment outcomes. The power calculation for this is shown below.
+
+pilot5
+```
+```{r}
+# Add Alexandra's stuff here
+# Pilot 5 frames statistics
+# pre_total <- as.integer(mean(pilot5$total_frames_pre))
+# after_total <- as.integer(mean(pilot5$total_frames_after))
+# 
+# # Rough estimation: We have a larger number of frames in the post treatment period compared to the pre treatment.
+# # We increased the window to collect the treatment effect from 5 minutes to seven minutes in order to capture any delayed responses. We will use t test for two samples with unequal n and insert the average treatment effect.
+# 
+temp_te <- mean(pilot5[treatment_group==1,te])-mean(pilot5[treatment_group==0,te])/sd(pilot5[treatment_group==0,te])
+
+pwr.t2n.test(n1=pre_total, n2=after_total, d=temp_te, sig.level=0.05, power=NULL)
+
+
+
+total_samples_per_condition <- c(20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 150)
+
+for(i in 1:length(total_samples_per_condition)) { 
+  size_power[i] <- pwr.t2n.test(
+    n1 = total_samples_per_condition[i], n2 = total_samples_per_condition[i], d=temp_te, sig.level=0.05, power=NULL
+    )$power
+}
+
+plot(x = total_samples_per_condition, y = size_power, type = 'l')
+```
+
+
+# EDA
+
+
+```{r}
+eda_section <- d[, .(treatment = sum(treatment_group == 0), control = sum(treatment_group == 1)), , keyby= .(section)]
+eda_section
+eda_s_m<- t(matrix(c(eda_section$treatment, eda_section$control), nrow = 6))
+colors = c('moccasin', 'lightcyan2') #'lightpink2')
+barplot(eda_s_m, names.arg = eda_section$section, ylab='Number of Samples', xlab= 'Section',  main = 'Distribution of Treatment And Control Across Sections', col=colors)
+legend("topleft", c("Treatment","Control"), cex = 0.8, fill =  colors)
+```
+
+```{r}
+eda_frames <- d[, matrix(c(total_frames_pre, total_frames_after), nrow = 2)]
+colors = c('moccasin', 'lightcyan2') #'lightpink2')
+barplot(eda_frames, names.arg = c(1:105), xlab = "Sample", main = 'Frames Counts Pre/Post Treatment', border = 'lightcyan4', ylab = "Frame Counts", col = colors)
+legend("topleft", c("Frames Pre Treatment","Frames Post Treatment"), cex = 0.8, fill =  colors)
+```
+
+
+```{r}
+# dropping "damaged" samples
+d <- d[!(subject == 'Steven (Meng-Hsien) Lin' & date == 10292020 & section == 'Sec5')]
+d <- d[section != 'Sec266']
+d
+```
+
+
+
+```{r}
+d[, total_frames := total_frames_pre + total_frames_after] # total frames for each subject
+d[, pw_score := score_pre / total_frames_pre] # pre weighted score
+d[, aw_score := score_after / total_frames_after] # after weighted score
+head(d)
+```
+
+```{r}
+# means of pre/post/total/diff(after, post) 
+d[, .(total_frames_mean = mean(total_frames), pre_frames_mean = mean(total_frames_pre), after_frames_mean = mean(total_frames_after), diff_mean = mean(total_frames_after - total_frames_pre))]
+```
+
+
+```{r}
+# distributions of frames by section and date
+d[, .(total_frames = mean(total_frames), pre_frames = mean(total_frames_pre), after_frames = mean(total_frames_after), diff_mean = mean(total_frames_after - total_frames_pre)), keyby = .(date, section)]
+```
+
+
+```{r}
+# take only the relevant columns
+data <- d[, .(date, section, subject, study, treatment_group, output = 100 * (aw_score - pw_score))]
+data
+```
+
+
+
+```{r}
+# baseline model
+m1 <- lm(output ~ treatment_group, data = data)
+m1.vcovHC <- vcovHC(m1)
+coeftest(m1, vcov. = m1.vcovHC)
+```
+
+
+```{r}
+# Version 1
+#data[, sec2 := as.integer(section == 'Sec2')]
+#data[, sec3 := as.integer(section == 'Sec3')]
+#data[, sec4 := as.integer(section == 'Sec4')]
+#data[, sec5 := as.integer(section == 'Sec5')]
+#m2 <- lm(output ~ treatment_group + sec2 + sec3 + sec4 + sec5, data = data)
+#m2.vcovHC <- vcovHC(m2)
+#coeftest(m2, vcov. = m2.vcovHC)
+```
+
+
+
+
+```{r}
+# Version 2
+# baseline model
+m2 <- lm(output ~ treatment_group + as.factor(section), data = data)
+m2.vcovHC <- vcovHC(m2)
+coeftest(m2, vcov. = m2.vcovHC)
+```
+
+
+```{r}
+# model
+data[, date_sec_block := (paste(date, section))]
+m3 <- lm(output ~ treatment_group +  as.factor(date_sec_block), data = data)
+m3.vcovHC <- vcovHC(m3)
+coeftest(m3, vcov. = m3.vcovHC)
+```
+
+
+```{r}
+m4 <- lm(output ~ treatment_group +  as.factor(date_sec_block) + study, data = data)
+m4.vcovHC <- vcovHC(m4)
+coeftest(m4, vcov. = m4.vcovHC)
+```
+
+```{r}
+# model
+data[, blocks := (paste(date, section, study))]
+m5 <- lm(output ~ treatment_group +  as.factor(blocks), data = data)
+m5.vcovHC <- vcovHC(m5)
+coeftest(m5, vcov. = m5.vcovHC)
+```
+
+
+```{r}
+labels =  c("Treatment", "Section 2", "Section 3", "Section 4", "Section 5", 
+                         
+                         "10/29/2020 : Section 5", "11/05/2020 : Section 5", "11/17/2020 : Section 1", 
+                         "11/18/2020 : Section 2", "11/18/2020 : Section 3", "11/19/2020 : Section 5", "12/03/2020 : Section 5",
+                         
+                         "10/29/2020 : Section 4 : Study 2", "10/29/2020 : Section 5 : Study 1", "10/29/2020 : Section 5 : Study 2", 
+                         "11/05/2020 : Section 5 : Study 1", "11/05/2020 : Section 5 : Study 2",
+                         "11/17/2020 : Section 1 : Study 1", "11/17/2020 : Section 1 : Study 2",
+                         "11/18/2020 : Section 2 : Study 1", "11/18/2020 : Section 2 : Study 2", 
+                         "11/18/2020 : Section 3 : Study 1", "11/18/2020 : Section 3 : Study 2", 
+                         "11/19/2020 : Section 5 : Study 1", 
+                         "12/03/2020 : Section 5 : Study 1",  "12/03/2020 : Section 5 : Study 2")
+
+
+stargazer::stargazer(m1, m2, m3,m5,
+                     type='text', 
+                     se=list(sqrt(diag(m1.vcovHC)), sqrt(diag(m2.vcovHC)), sqrt(diag(m3.vcovHC)), sqrt(diag(m5.vcovHC))), 
+                     column.labels = c("Treatment", " Sec (B)", "Sec+Date (B)", "Sec+Date+Study (B)"), omit.stat = c('ser', 'F'), 
+                     style="default", notes = "(B) = Blocking, Sec = Section", single.row = TRUE,
+                     title = "Single Channel (Video Frames) Models", digits = 2, dep.var.labels.include = FALSE, 
+                     model.numbers= FALSE, covariate.labels = labels, #c(),
+                     dep.var.caption = "Single Channel (Video Frames) Models", notes.label = "Symbols:", out = 'models1_3.txt')
+```
+
+
+# Statistical Analysis with Transcript Channel
+
+```{r}
+# load data
+d <- fread('./Data_processed/all_data_with_text.csv')
+head(d)
+```
+
+> speaking for score:
+>> if study 1 and treatment: pre - before_before, post - after_before
+>> if study 1 and control: pre - before_before, post - before_after
+>> if study 2 and treatment: pre - before_after, post - after_after
+>> if study 2 and control: pre - after_before, post - after_after
+
+
+> Compliance
+>> if study 1 and treatment: after_before_chat
+>> if study 2 and treatment: after_after_chat
+
+```{r}
+# dropping datapoints
+d <- d[!(subject == 'Steven (Meng-Hsien) Lin' & date == 10292020 & section == 'Sec5')]
+d <- d[section != 'Sec266']
+d
+```
+
+```{r}
+# initialize new columns
+d[, pre_total_with_text  := 0]
+d[, post_total_with_text := 0]
+d[, pre_score_with_text  := 0]
+d[, post_score_with_text := 0]
+d[, complied             := 0]
+```
+
+```{r}
+# Option 1
+
+# Pre
+# Pre Study 1 & (Treatment or Control)
+d[study == 1, pre_total_with_text :=  before_before_speak + total_frames_pre]
+d[study == 1, pre_score_with_text :=  before_before_speak + score_pre]
+
+# Pre Study 2 & Treatment
+d[study == 2 & treatment_group == 1, pre_total_with_text := before_after_speak + total_frames_pre]
+d[study == 2 & treatment_group == 1, pre_score_with_text := before_after_speak + score_pre]
+
+# Pre Study 2 & Control
+d[study == 2 & treatment_group == 0, pre_total_with_text := after_before_speak + total_frames_pre]
+d[study == 2 & treatment_group == 0, pre_score_with_text := after_before_speak + score_pre]
+
+
+
+# Post
+# Post Study 1 & Treatment 
+d[study == 1 & treatment_group == 1, post_total_with_text := after_after_speak + total_frames_after]
+d[study == 1 & treatment_group == 1, post_score_with_text := after_after_speak + score_after]
+
+# Post Study 1 & Control
+d[study == 1 & treatment_group == 0, post_total_with_text := before_after_speak + total_frames_after]
+d[study == 1 & treatment_group == 0, post_score_with_text := before_after_speak + score_after]
+
+# Post Study 2 & (Treatment or Control)
+d[study == 2, post_total_with_text := after_after_speak + total_frames_after]
+d[study == 2, post_score_with_text := after_after_speak + score_after]
+
+
+# Compliance
+d[study == 1 & treatment_group == 1 & after_before_chat > 0, complied := 1]
+d[study == 2 & treatment_group == 1 & after_after_chat > 0, complied := 1]
+
+# set all control to compliers
+d[treatment_group == 0, complied := 1] 
+head(d[complied != 0, ])
+```
+
+```{r}
+# Option 2
+
+# Pre
+# Pre Study 1 & (Treatment or Control)
+d[study == 1, pre_total_with_text := 1 + total_frames_pre]
+d[study == 1, pre_score_with_text := before_before_speak + score_pre]
+
+# Pre Study 2 & Treatment
+d[study == 2 & treatment_group == 1, pre_total_with_text := 1 + total_frames_pre]
+d[study == 2 & treatment_group == 1, pre_score_with_text := before_after_chat + before_after_speak + score_pre]
+
+# Pre Study 2 & Control
+d[study == 2 & treatment_group == 0, pre_total_with_text := 1 + total_frames_pre]
+d[study == 2 & treatment_group == 0, pre_score_with_text := after_before_speak + score_pre]
+
+
+
+# Post
+# Post Study 1 & Treatment 
+d[study == 1 & treatment_group == 1, post_total_with_text :=  1 + total_frames_after]
+d[study == 1 & treatment_group == 1, post_score_with_text :=  after_after_speak + score_after]
+
+# Post Study 1 & Control
+d[study == 1 & treatment_group == 0, post_total_with_text := 1 + total_frames_after]
+d[study == 1 & treatment_group == 0, post_score_with_text :=before_after_speak + score_after]
+
+# Post Study 2 & (Treatment or Control)
+d[study == 2, post_total_with_text := 1 + total_frames_after]
+d[study == 2, post_score_with_text := after_after_speak + score_after]
+
+
+# Compliance
+d[study == 1 & treatment_group == 1 & after_before_chat > 0, complied := 1]
+d[study == 2 & treatment_group == 1 & after_after_chat > 0, complied := 1]
+
+# set all control to compliers
+d[treatment_group == 0, complied := 1] 
+head(d[complied != 0, ])
+```
+
+
+
+```{r}
+# check treatment subjects
+d[, .N ,keyby = .(treatment_group)]
+```
+
+
+```{r}
+# compliance distribution
+d[complied == 1, .N ,keyby = .(treatment_group)]
+```
+
+```{r}
+d[, pw_score := pre_score_with_text / pre_total_with_text] # pre weighted score
+d[, aw_score := post_score_with_text / post_total_with_text] # after weighted score
+head(d)
+```
+
+```{r}
+data <- d[, .(date, section, subject, study, treatment_group, output = 100 * (aw_score - pw_score)), complied]
+data
+```
+
+
+```{r}
+# model 6
+m6 <- lm(output ~ treatment_group, data = data)
+m6.vcovHC <- vcovHC(m6)
+coeftest(m6, vcov. = m6.vcovHC)
+```
+
+
+```{r}
+# model 7 
+m7 <- lm(output ~ treatment_group +  as.factor(section), data = data)
+m7.vcovHC <- vcovHC(m7)
+coeftest(m7, vcov. = m7.vcovHC)
+```
+
+
+```{r}
+# model 8
+data[, blocks_d_s := (paste(date, section))]
+m8 <- lm(output ~ treatment_group +  as.factor(blocks_d_s), data = data)
+m8.vcovHC <- vcovHC(m8)
+coeftest(m8, vcov. = m8.vcovHC)
+```
+
+
+```{r}
+# model 9
+data[, blocks := (paste(date, section, study))]
+m9 <- lm(output ~ treatment_group +  as.factor(blocks), data = data)
+m9.vcovHC <- vcovHC(m9)
+coeftest(m9, vcov. = m9.vcovHC)
+```
+
+```{r}
+labels =  c("Treatment", "Section 2", "Section 3", "Section 4", "Section 5", 
+                         
+                         "10/29/2020 : Section 5", "11/05/2020 : Section 5", "11/17/2020 : Section 1", 
+                         "11/18/2020 : Section 2", "11/18/2020 : Section 3", "11/19/2020 : Section 5", "12/03/2020 : Section 5",
+                         
+                         "10/29/2020 : Section 4 : Study 2", "10/29/2020 : Section 5 : Study 1", "10/29/2020 : Section 5 : Study 2", 
+                         "11/05/2020 : Section 5 : Study 1", "11/05/2020 : Section 5 : Study 2",
+                         "11/17/2020 : Section 1 : Study 1", "11/17/2020 : Section 1 : Study 2",
+                         "11/18/2020 : Section 2 : Study 1", "11/18/2020 : Section 2 : Study 2", 
+                         "11/18/2020 : Section 3 : Study 1", "11/18/2020 : Section 3 : Study 2", 
+                         "11/19/2020 : Section 5 : Study 1", 
+                         "12/03/2020 : Section 5 : Study 1",  "12/03/2020 : Section 5 : Study 2")
+
+
+stargazer::stargazer(m6, m7, m8,m9,
+                     type='text', 
+                     se=list(sqrt(diag(m6.vcovHC)), sqrt(diag(m7.vcovHC)), sqrt(diag(m8.vcovHC)), sqrt(diag(m9.vcovHC))), 
+                     column.labels = c("Treatment", " Sec (B)", "Sec+Date (B)", "Sec+Date+Study (B)"), omit.stat = c('ser', 'F'), 
+                     style="default", notes = "(B) = Blocking, Sec = Section", single.row = TRUE,
+                     title = "Dual Channel Models", digits = 2, dep.var.labels.include = FALSE, 
+                     model.numbers= FALSE, covariate.labels = labels, #c(),
+                     dep.var.caption = "Dual Channel Models", notes.label = "Symbols:", out = 'models1_3.txt')
+```
+
+
+
+```{r}
+labels =  c("Treatment","10/29/2020 : Section 4 : Study 2", "10/29/2020 : Section 5 : Study 1", "10/29/2020 : Section 5 : Study 2", 
+                         "11/05/2020 : Section 5 : Study 1", "11/05/2020 : Section 5 : Study 2",
+                         "11/17/2020 : Section 1 : Study 1", "11/17/2020 : Section 1 : Study 2",
+                         "11/18/2020 : Section 2 : Study 1", "11/18/2020 : Section 2 : Study 2", 
+                         "11/18/2020 : Section 3 : Study 1", "11/18/2020 : Section 3 : Study 2", 
+                         "11/19/2020 : Section 5 : Study 1", 
+                         "12/03/2020 : Section 5 : Study 1",  "12/03/2020 : Section 5 : Study 2")
+
+
+stargazer::stargazer(m5, m9,
+                     type='text', 
+                     se=list(sqrt(diag(m5.vcovHC)), sqrt(diag(m9.vcovHC))), 
+                     column.labels = c("Single Channel", "Dual Channel"), omit.stat = c('ser', 'F'), 
+                     style="default", notes = "(B) = Blocking, Sec = Section", single.row = TRUE,
+                     title = "Single Channel Model VS. Dual  Channel Model", digits = 2, dep.var.labels.include = FALSE, 
+                     model.numbers= FALSE, covariate.labels = labels, #c(),
+                     dep.var.caption = "Single Channel VS. Dual  Channels", notes.label = "Symbols:", out = 'models1_3.txt')
+```
+
+
+# CACE
+
+```{r}
+cace <- data[complied == 1, .(means = mean(output)), keyby = .(treatment_group)][, diff(means)]
+cace
+```
+
+
+
+# Conclusion
+
+# Next Steps
+Video analysis has progressed rapidly with the development of automatic vision object tracking techniques using deep learning. In our work, we deployed a VGG model pretrained to identify faces using the canonical FER 2013 dataset. This variant of the CNN that we used was a technological improvement over using histogram of oriented gradients and linear SVMs for video analysis, but we believe that improvements can be made in the way our model detects images. In our current model, engagement is detected through stand-alone images of facial expressions. While this serves as a good benchmark to label individual frames, we find that we can improve our analysis by adding relevant context to single frames. If we extend our analysis to sequences of frames and analyzing the differences between them, we can classify engagement with more confidence because of the addition of contextual data. For example, the label of a single frame showing an individual occluding the camera by lifting their arm could be considered momentarily disengaged, but a sequence of frames indicating that the individual was simply adjusting their glasses could indicate that they are still very much engaged. This is possible with the use of larger pre-trained classifiers for facial features in open source libraries such as OpenCV. Moving forward with this project, we see large advances in engagement detection using some of these sliding window techniques. 
+
+# References
+
+Patricia Goldberg, Ömer Sümer, Kathleen Stürmer, Wolfgang Wagner, Richard Göllner, Peter Gerjets, Enkelejda Kasneci & Ulrich Trautwein. Attentive or Not? Toward a Machine Learning Approach to Assessing Students’ Visible Engagement in Classroom Instruction (2019). Educational Psychology Review URL: https://link.springer.com/article/10.1007/s10648-019-09514-z
+
+[3] Omid Mohamad Nezami , Mark Dras, Len Hamey, Deborah Richards, Stephen Wan, and Cecile Pari (2018). “Automated Recognition of Student Engagement”. URL: https://arxiv.org/abs/1808.02324
+
+J. Whitehill, Z. Serpell, Y. Lin, A. Foster and J. R. Movellan (2014) "The Faces of Engagement: Automatic Recognition of Student Engagement from Facial Expressions," in IEEE Transactions on Affective Computing, vol. 5, no. 1, pp. 86-98, 1 Jan.-March 2014, doi: 10.1109/TAFFC.2014.2316163. URL: https://inc.ucsd.edu/mplab/wordpress/wp-content/uploads/EngagementRecognitionFinal.pdf
+
+Costa, J., M. Jung, M. Czerwinski, François Guimbretière, Trinh Le and T. Choudhury (2018). “Regulating Feelings During Interpersonal Conflicts by Changing Voice Self-perception.” CHI '18 URL: https://www.microsoft.com/en-us/research/uploads/prod/2018/03/CHI2018-conflicts-final.pdf
+
+S. Mota and R.W. Picard (2003),"Automated Posture Analysis for Detecting Learner's Interest Level,"Workshop on Computer Vision and Pattern Recognition for Human-Computer Interaction, CVPR HCI, June, 2003. PDFTR 574. URL: https://affect.media.mit.edu/pdfs/03.mota-picard.pdf
+
+S. Mota (2002),"Automated Posture Analysis For Detecting Learner's Affective State," MIT MS Thesis, September 2002. URL: https://affect.media.mit.edu/pdfs/02.mota.pdf
+
+A. Savelieva, T. Payne, G. Mein (2019) “AISLE: AI-Supervised Learning Environment”. Berkeley MIDS w205 final course project (Spring 2019 cohort). August 2019. URL: https://drive.google.com/file/d/1Av823uPlQW8R_kdb-WSi25M_UyYualxD/view?usp=sharing
+
+A. Savelieva (2019), “Say Goodbye to Bad Meetings: how Data Science, Face API, and HoloLens can take your communication to next level” W201 Summer 19 || Group 1| Live Session Monday 6.30PM. URL: https://drive.google.com/file/d/1v1YJ5DKLH8IXccAGeuzh6COcex8_pg1T/view?usp=sharing
+
+Zhang, Xucong, Yusuke Sugano, Mario Fritz, and Andreas Bulling. "Appearance-based Gaze Estimation in the Wild." Proc. of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2015. arXiv:1504.02863, Project Page
+
+Zhang, Xucong, Yusuke Sugano, Mario Fritz, and Andreas Bulling. "It's Written All Over Your Face: Full-Face Appearance-Based Gaze Estimation." Proc. of the IEEE Conference on Computer Vision and Pattern Recognition Workshops(CVPRW), 2017. arXiv:1611.08860, Project Page
+
+Zhang, Xucong, Yusuke Sugano, Mario Fritz, and Andreas Bulling. "MPIIGaze: Real-World Dataset and Deep Appearance-Based Gaze Estimation." IEEE transactions on pattern analysis and machine intelligence 41 (2017). arXiv:1711.09017
+
+Schultz, Leah & Sharp, Jason. (2007). The Effect of Class Duration on Academic Performance and Attendance in an Introductory Computer Class. Information Systems Education Journal. 6. 1-7. https://www.researchgate.net/publication/228912278_The_Effect_of_Class_Duration_on_Academic_Performance_and_Attendance_in_an_Introductory_Computer_Class
+
+National Commission for the Protection of Human Subjects of Biomedical and Behavioral Research. (1979). The Belmont report: Ethical principles and guidelines for the protection of human subjects of research.
+
+# Appendix
+## 1. Initial Recruitment Message
+<em> Hello! <br>
+My team and I are working on an experiment for 241. We would appreciate your consent for our research (it takes less than a minute :))? Except that we won’t need you to do anything else. Sending you the consent form. :slightly_smiling_face: <br> </em>
+https://forms.gle/kdBDmRmG6asoFkQt8" <br>
+
+## 2. Consent Form for Study Participation
+```{r, echo=FALSE, out.width="50%", fig.cap="Consent Form for Participation"}
+knitr::include_graphics("Images_for_Paper/consent_form.png")
+```
+
+## 3. Annotator Instructions and Disclosure Form
+```{r, echo=FALSE, out.width="100%", fig.cap="Annotator Instructions"}
+knitr::include_graphics("Images_for_Paper/annotator_disclaimer.png")
+```

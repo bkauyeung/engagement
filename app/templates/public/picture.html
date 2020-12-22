@@ -1,0 +1,81 @@
+
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}Sign up{% endblock %}
+
+{% block main %}
+
+<style>
+h1 {text-align: center;}
+.newspaper {
+    column-count: 2;
+    column-gap: 40px;
+    column-rule: 1px solid lightblue;
+  }
+</style>
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <h1>{{picture_number}}. Zoom Picture Scoring</h1>
+      <hr>
+
+
+      <form action="/picture" method="POST">
+      <img src="{{ url_for('static', filename = sample_pic) }}" alt="face" class="d-flex justify-content-center">
+    </div>
+  </div>
+  <div class="row mt-4">
+    <div class="col-md-6">
+  	     <div class="form-group form-check">
+            <label><b>1. Select the person's behavioral appearance:</b></label>
+            <br>
+            <input class="form-check-input" type="radio" id="on_task" name="behavior" value="on_task" required>
+            <label for="on_task" class="form-check-label">On Task</label><br>
+            <input class="form-check-input" type="radio" id="off_task" name="behavior" value="off_task">
+            <label for="off_task"> Off Task</label><br>
+            <input class="form-check-input" type="radio" id="cant_decide_behavior" name="behavior" value="cant_decide_behavioral">
+            <label for="cant_decide_behavioral">Can't decide</label><br>
+          </div>
+    </div>
+    <div class="col-md-6">
+          <div class="form-group form-check">
+            <label><b>2. Select the person's emotional appearance:</b></label>
+            <br>
+            <input class="form-check-input" type="radio" id="satisfied" name="emotional" value="satisfied" required>
+            <label for="satisfied">Satisfied</label><br>
+            <input class="form-check-input" type="radio" id="confused" name="emotional" value="confused">
+            <label for="confused">Confused</label><br>
+            <input class="form-check-input" type="radio" id="bored" name="emotional" value="bored">
+            <label for="bored">Bored</label><br>
+            <input class="form-check-input" type="radio" id="cant_decide_emotion" name="emotional" value="cant_decide_emotional">
+            <label for="cant_decide_emotional">Can't decide</label><br>
+          </div>
+
+
+
+    </div>
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <p style="font-size:15px" class="indented"><em>On Task:</em> The student is looking towards the screen or looking down to the keyboard below the screen.<br>
+          <em>Off Task:</em> The student is looking everywhere else or eyes completely closed, or head turned away. <br>
+          <em>Can't Decide:</em> If you cannot decide on the behavioral state.
+        </p>
+    </div>
+      <div class="col-md-6">
+        <p style="font-size:15px" class="indented"><em>Satisfied:</em> The student is not having any emotional problems during the learning task. This can include all positive states of the student from being neutral to being excited during the learning task.<br>
+          <em>Confused:</em> The student is getting confused during the learning task. In some cases, this state might include some other negative states such as frustration.<br>
+          <em>Bored:</em> If the student is feeling bored during the learning task.<br>
+          <em>Can't Decide:</em> If you cannot decide on the behavioral state.<br>
+        </p>
+        <button type="submit" class="btn btn-primary">Submit</button>
+
+        {% if feedback %}
+        <p class="text-danger float-right">{{ feedback }}</p>
+        {% endif %}
+        </form>
+  </div>
+</div>
+
+{% endblock %}
